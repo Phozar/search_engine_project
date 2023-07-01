@@ -1,0 +1,41 @@
+# example values
+indexing-settings:
+  sites:
+    - url: http://www.playback.ru/
+      name: playback
+
+    - url: https://volochek.life/
+      name: volochek
+
+    - url: http://radiomv.ru/
+      name: radio
+
+    - url: https://ipfran.ru/
+      name: ipfran
+
+    - url: https://dimonvideo.ru/
+      name: dimonvideo
+
+    - url: https://nikoartgallery.com/
+      name: nikoartgallery
+
+    - url: https://et-cetera.ru/mobile/
+      name: etc
+
+    - url: https://www.lutherancathedral.ru/
+      name: lutherancathedral
+
+    - url: https://dombulgakova.ru/
+      name: dombulgakova
+
+    - url: https://www.svetlovka.ru/
+      name: svetlovka
+
+  name: SearchBotMachine
+  referer: https://google.com
+  timeout: 15000
+  contentType: text/html; charset=utf-8
+
+search-settings:
+  limit: 20
+  offset: 0
