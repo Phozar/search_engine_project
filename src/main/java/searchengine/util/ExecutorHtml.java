@@ -1,17 +1,17 @@
 package searchengine.util;
 
 import lombok.extern.slf4j.Slf4j;
+import searchengine.model.EntityPage;
+import searchengine.model.EntitySite;
 import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import searchengine.model.*;
-import searchengine.model.repositories.RepositoryIndex;
-import searchengine.model.repositories.RepositoryLemma;
-import searchengine.model.repositories.RepositoryPage;
-import searchengine.model.repositories.RepositorySite;
+import searchengine.repositories.RepositoryIndex;
+import searchengine.repositories.RepositoryLemma;
+import searchengine.repositories.RepositoryPage;
+import searchengine.repositories.RepositorySite;
 import searchengine.util.morphology.StartLemmaFind;
-import searchengine.services.NetworkService;
 
 import java.io.IOException;
 import java.util.*;
@@ -27,7 +27,7 @@ public class ExecutorHtml extends RecursiveAction {
     private final RepositoryIndex repositoryIndex;
     private final RepositoryLemma repositoryLemma;
     private static Pattern patternUrl;
-    private static NetworkService network;
+    private static NetworkUtil network;
     public static volatile boolean stop = false;
     private final static Set<String> setAbsUrls = ConcurrentHashMap.newKeySet();
     private final ExecutorService executorService;
@@ -45,7 +45,7 @@ public class ExecutorHtml extends RecursiveAction {
 
     }
 
-    public ExecutorHtml(EntitySite entitySite, String url, RepositoryPage repositoryPage, NetworkService network,
+    public ExecutorHtml(EntitySite entitySite, String url, RepositoryPage repositoryPage, NetworkUtil network,
                         RepositorySite repositorySite, RepositoryIndex repositoryIndex, RepositoryLemma repositoryLemma) throws IOException {
         this.repositorySite = repositorySite;
         this.entitySite = entitySite;
@@ -83,14 +83,14 @@ public class ExecutorHtml extends RecursiveAction {
 
             Document document = response.parse();
 
-            //TODO update Site time
+
             updateSiteTime(entitySite);
 
-            //TODO Create and save page
+
             EntityPage entityPage = getEntityPage(document, url);
             repositoryPage.saveAndFlush(entityPage);
 
-            //TODO Create and save lemmas
+
             Future<?> submit = executorService.submit(new StartLemmaFind(entitySite, entityPage,
                                                                          repositoryIndex, repositoryLemma));
             submit.get();

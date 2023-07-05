@@ -1,15 +1,15 @@
 package searchengine.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import searchengine.config.SearchCfg;
-import searchengine.dto.Response.FalseResponse;
 import searchengine.dto.Response.IndexResponse;
 import searchengine.dto.Response.SearchResponse;
 import searchengine.dto.statistics.SearchDto;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.services.IndexingService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import searchengine.config.SearchCfg;
+import searchengine.dto.Response.FalseResponse;
 import searchengine.services.SearchService;
 import searchengine.services.StatisticsService;
 

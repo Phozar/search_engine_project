@@ -1,13 +1,13 @@
 package searchengine.util.morphology;
 
 import lombok.extern.slf4j.Slf4j;
-import searchengine.model.EntityIndex;
 import searchengine.model.EntityLemma;
-import searchengine.model.EntityPage;
 import searchengine.model.EntitySite;
-import searchengine.model.repositories.RepositoryIndex;
-import searchengine.model.repositories.RepositoryLemma;
+import searchengine.repositories.RepositoryIndex;
+import searchengine.repositories.RepositoryLemma;
 import searchengine.util.ClearHtmlCode;
+import searchengine.model.EntityIndex;
+import searchengine.model.EntityPage;
 
 import java.io.IOException;
 import java.util.*;

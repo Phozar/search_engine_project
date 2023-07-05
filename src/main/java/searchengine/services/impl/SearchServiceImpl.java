@@ -10,10 +10,10 @@ import searchengine.model.EntityIndex;
 import searchengine.model.EntityLemma;
 import searchengine.model.EntityPage;
 import searchengine.model.EntitySite;
-import searchengine.model.repositories.RepositoryIndex;
-import searchengine.model.repositories.RepositoryLemma;
-import searchengine.model.repositories.RepositoryPage;
-import searchengine.model.repositories.RepositorySite;
+import searchengine.repositories.RepositoryIndex;
+import searchengine.repositories.RepositoryLemma;
+import searchengine.repositories.RepositoryPage;
+import searchengine.repositories.RepositorySite;
 import searchengine.util.morphology.Morphology;
 import searchengine.services.SearchService;
 import searchengine.util.GetSearchDto;
@@ -32,7 +32,7 @@ public class SearchServiceImpl implements SearchService {
     private final RepositoryPage pageRepository;
     private final RepositoryIndex indexRepository;
     private final RepositorySite siteRepository;
-    private final static int newFixedThreadPool = Runtime.getRuntime().availableProcessors();
+    private static final int NEW_FIXED_THREAD_POOL = Runtime.getRuntime().availableProcessors();
 
     @SneakyThrows
     @Override
@@ -78,7 +78,7 @@ public class SearchServiceImpl implements SearchService {
     private List<SearchDto> getSearchDto(HashMap<EntityPage, Float> entityPageFloatHashMap, Set<String> entityLemmas) throws ExecutionException, InterruptedException {
         List<SearchDto> resultList = new ArrayList<>();
         List<Future> tasks = new ArrayList<>();
-        ExecutorService executorService = Executors.newFixedThreadPool(newFixedThreadPool);
+        ExecutorService executorService = Executors.newFixedThreadPool(NEW_FIXED_THREAD_POOL);
         for (Map.Entry<EntityPage, Float> entry : entityPageFloatHashMap.entrySet()) {
             GetSearchDto searchDto = new GetSearchDto(entry, entityLemmas, morphology);
             var submit = executorService.submit(searchDto);
@@ -98,37 +98,43 @@ public class SearchServiceImpl implements SearchService {
         CopyOnWriteArrayList<EntityPage> entityPages = pageRepository.findByLemma(firstLemma, entitySite);
         if (entityPages.isEmpty()) {
             return new HashMap<>();
-        } else {
-            if (entityLemmas.size() == 1) {
-                for (EntityPage entityPage : entityPages) {
-                    EntityIndex entityIndex = indexRepository.findByPageAndLemma(entityPage, entityLemmas.get(0));
-                    resultMap.put(entityPage, entityIndex.getRank());
-                }
-                return getSortedMap(resultMap, limit);
-            }
-            List<EntityIndex> entityIndices = indexRepository.findByPagesAndLemmas(entityLemmas, entityPages);
-            Map<EntityPage, EntityIndex> collect1 = new HashMap<>();
-            for (EntityIndex entityIndex : entityIndices) {
-                collect1.put(entityIndex.getPage(), entityIndex);
+        }
+
+        if (entityLemmas.size() == 1) {
+            for (EntityPage entityPage : entityPages) {
+                EntityIndex entityIndex = indexRepository.findByPageAndLemma(entityPage, entityLemmas.get(0));
+                resultMap.put(entityPage, entityIndex.getRank());
             }
 
-            for (EntityLemma entityLemma : entityLemmas) {
-                if (entityLemma.getLemma().equals(firstLemma)) {
-                    continue;
-                }
-                for (EntityPage entityPage : entityPages) {
-                    if (collect1.get(entityPage) == null) {
-                        resultMap.remove(entityPage);
-                        entityPages.remove(entityPage);
-                    } else {
-                        float rank = resultMap.get(entityPage) == null ? 0 : resultMap.get(entityPage);
-                        resultMap.put(entityPage, collect1.get(entityPage).getRank() + rank);
-                    }
-                }
-            }
             return getSortedMap(resultMap, limit);
         }
 
+        List<EntityIndex> entityIndices = indexRepository.findByPagesAndLemmas(entityLemmas, entityPages);
+        Map<EntityPage, EntityIndex> collect1 = new HashMap<>();
+
+        for (EntityIndex entityIndex : entityIndices) {
+            collect1.put(entityIndex.getPage(), entityIndex);
+        }
+
+        for (EntityLemma entityLemma : entityLemmas) {
+            if (entityLemma.getLemma().equals(firstLemma)) {
+                continue;
+            }
+
+            for (Iterator<EntityPage> iterator = entityPages.iterator(); iterator.hasNext(); ) {
+                EntityPage entityPage = iterator.next();
+
+                if (collect1.get(entityPage) == null) {
+                    iterator.remove();
+                    resultMap.remove(entityPage);
+                } else {
+                    float rank = resultMap.getOrDefault(entityPage, 0f);
+                    resultMap.put(entityPage, collect1.get(entityPage).getRank() + rank);
+                }
+            }
+        }
+
+        return getSortedMap(resultMap, limit);
     }
 
     private HashMap<EntityPage, Float> getSortedMap(HashMap<EntityPage, Float> resultMap, Integer limit) {

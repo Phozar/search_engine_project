@@ -3,25 +3,25 @@ package searchengine.services.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import searchengine.dto.Response.IndexResponse;
+import searchengine.model.EntityPage;
+import searchengine.model.EntitySite;
+import searchengine.model.Status;
+import searchengine.repositories.RepositoryIndex;
+import searchengine.repositories.RepositoryLemma;
+import searchengine.repositories.RepositoryPage;
+import searchengine.repositories.RepositorySite;
+import searchengine.services.IndexingService;
+import searchengine.util.ExecutorHtml;
+import searchengine.util.NetworkUtil;
+import searchengine.util.StartExecutor;
+import searchengine.util.morphology.StartLemmaFind;
 import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import searchengine.config.SiteCfg;
 import searchengine.config.SitesListCfg;
-import searchengine.dto.Response.IndexResponse;
-import searchengine.model.EntityPage;
-import searchengine.model.EntitySite;
-import searchengine.model.Status;
-import searchengine.model.repositories.RepositoryIndex;
-import searchengine.model.repositories.RepositoryLemma;
-import searchengine.model.repositories.RepositoryPage;
-import searchengine.model.repositories.RepositorySite;
-import searchengine.util.morphology.StartLemmaFind;
-import searchengine.services.IndexingService;
-import searchengine.services.NetworkService;
-import searchengine.util.ExecutorHtml;
-import searchengine.util.StartExecutor;
 
 import java.io.IOException;
 import java.util.*;
@@ -39,7 +39,7 @@ public class IndexingServiceImpl implements IndexingService {
     private final RepositoryIndex repositoryIndex;
     private final RepositorySite repositorySite;
     private final RepositoryPage repositoryPage;
-    private final NetworkService network;
+    private final NetworkUtil network;
     private final Pattern pattern = Pattern.compile("^(https?://)?([\\w-]{1,32}\\.[\\w-]{1,32})[^\\s@]*$");
 
 
@@ -96,22 +96,34 @@ public class IndexingServiceImpl implements IndexingService {
             }
             Connection.Response connection = network.getConnection(url);
             Document document = connection.parse();
-            if (connection.statusCode() == HttpStatus.OK.value()) {
-                StartLemmaFind.stop = false;
-                for (SiteCfg site : sitesList.getSites()) {
-                    EntitySite entitySite = repositorySite.findEntitySiteByUrl(site.getUrl());
-                    if (url.contains(site.getUrl()) && entitySite == null) {
-                        saveEntitySiteAndPage(site, url, document);
-                    } else if (url.contains(site.getUrl()) && entitySite != null) {
-                        EntityPage entityPage = repositoryPage.findByPathAndSiteId(getPath(url, site), entitySite.getId());
-                        if (entityPage != null) {
-                            startLemmaFind(entitySite, entityPage);
-                        } else {
-                            EntityPage entityPage2 = getEntityPage(document, getPath(url, site), entitySite);
-                            repositoryPage.saveAndFlush(entityPage2);
-                            startLemmaFind(entitySite, entityPage2);
-                        }
+
+            if (connection.statusCode() != HttpStatus.OK.value()) {
+                return new IndexResponse(false, "Данная страница находится за пределами сайтов, " +
+                        "указанных в конфигурационном файле");
+            }
+
+            StartLemmaFind.stop = false;
+
+            for (SiteCfg site : sitesList.getSites()) {
+                EntitySite entitySite = repositorySite.findEntitySiteByUrl(site.getUrl());
+
+                if (url.contains(site.getUrl()) && entitySite == null) {
+                    saveEntitySiteAndPage(site, url, document);
+                    log.info("Страница " + url + " проиндексирована.");
+                    return new IndexResponse(true);
+                }
+
+                if (url.contains(site.getUrl()) && entitySite != null) {
+                    EntityPage entityPage = repositoryPage.findByPathAndSiteId(getPath(url, site), entitySite.getId());
+
+                    if (entityPage != null) {
+                        startLemmaFind(entitySite, entityPage);
+                    } else {
+                        EntityPage entityPage2 = getEntityPage(document, getPath(url, site), entitySite);
+                        repositoryPage.saveAndFlush(entityPage2);
+                        startLemmaFind(entitySite, entityPage2);
                     }
+
                     log.info("Страница " + url + " проиндексирована.");
                     return new IndexResponse(true);
                 }

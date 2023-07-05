@@ -21,7 +21,7 @@ public class EntityLemma implements Comparable<EntityLemma> {
     @Column(unique = true, nullable = false)
     private Integer id;
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     private EntitySite site;
     @Column(columnDefinition = "VARCHAR(255)")
     private String lemma;

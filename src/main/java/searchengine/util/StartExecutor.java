@@ -3,11 +3,10 @@ package searchengine.util;
 import lombok.extern.slf4j.Slf4j;
 import searchengine.model.EntitySite;
 import searchengine.model.Status;
-import searchengine.model.repositories.RepositoryIndex;
-import searchengine.model.repositories.RepositoryLemma;
-import searchengine.model.repositories.RepositoryPage;
-import searchengine.model.repositories.RepositorySite;
-import searchengine.services.NetworkService;
+import searchengine.repositories.RepositoryIndex;
+import searchengine.repositories.RepositoryLemma;
+import searchengine.repositories.RepositoryPage;
+import searchengine.repositories.RepositorySite;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -19,14 +18,14 @@ public class StartExecutor implements Runnable {
     private final EntitySite entitySite;
     private final RepositoryPage repositoryPage;
     private static ForkJoinPool fjp;
-    private final NetworkService network;
+    private final NetworkUtil network;
     private final RepositorySite repositorySite;
     private final RepositoryIndex repositoryIndex;
     private final RepositoryLemma repositoryLemma;
 
 
     public StartExecutor(EntitySite entitySite, RepositoryPage repositoryPage,
-                         NetworkService network, RepositorySite repositorySite,
+                         NetworkUtil network, RepositorySite repositorySite,
                          RepositoryLemma repositoryLemma, RepositoryIndex repositoryIndex) {
         this.entitySite = entitySite;
         this.repositoryPage = repositoryPage;

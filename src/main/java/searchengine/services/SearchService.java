@@ -1,7 +1,7 @@
 package searchengine.services;
 
-import searchengine.config.SearchCfg;
 import searchengine.dto.statistics.SearchDto;
+import searchengine.config.SearchCfg;
 
 import java.util.List;
 

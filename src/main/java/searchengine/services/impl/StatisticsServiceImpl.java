@@ -1,7 +1,6 @@
 package searchengine.services.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import searchengine.config.SiteCfg;
 import searchengine.config.SitesListCfg;
 import searchengine.dto.statistics.DetailedStatisticsItem;
@@ -10,10 +9,11 @@ import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.dto.statistics.TotalStatistics;
 import searchengine.model.EntitySite;
 import searchengine.model.Status;
-import searchengine.model.repositories.RepositoryLemma;
-import searchengine.model.repositories.RepositoryPage;
-import searchengine.model.repositories.RepositorySite;
+import searchengine.repositories.RepositoryLemma;
+import searchengine.repositories.RepositoryPage;
+import searchengine.repositories.RepositorySite;
 import searchengine.services.StatisticsService;
+import org.springframework.stereotype.Service;
 
 import java.lang.constant.Constable;
 import java.util.ArrayList;

@@ -15,8 +15,8 @@ import java.util.Locale;
 @Component
 public class MorphologyAnalyzer implements Morphology {
     private static RussianLuceneMorphology russianMorph;
-    private final static String regex = "\\p{Punct}|[0-9]|@|©|◄|»|«|—|-|№|…";
-    private final static Marker SIMBOL_MARKER = MarkerManager.getMarker("INVALID_SYMBOL");
+    private static final String REGEX = "\\p{Punct}|[0-9]|@|©|◄|»|«|—|-|№|…";
+    private static final Marker SIMBOL_MARKER = MarkerManager.getMarker("INVALID_SYMBOL");
 
     static {
         try {
@@ -29,7 +29,7 @@ public class MorphologyAnalyzer implements Morphology {
     @Override
     public HashMap<String, Integer> getLemmaList(String content) {
         content = content.toLowerCase(Locale.ROOT)
-                .replaceAll(regex, " ");
+                .replaceAll(REGEX, " ");
         HashMap<String, Integer> lemmaList = new HashMap<>();
         String[] elements = content.toLowerCase(Locale.ROOT).split("\\s+");
         for (String el : elements) {
