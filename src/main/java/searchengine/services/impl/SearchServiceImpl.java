@@ -38,10 +38,12 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public List<SearchDto> allSiteSearch(SearchCfg searchCfg) {
         List<EntitySite> entitySites = siteRepository.findAll();
+
         HashMap<EntityPage, Float> entityPageFloatHashMap = new HashMap<>();
-        Set<String> lemmaSet = getLemmaSet(searchCfg.getQuery());
+        Map<String, Set<String>> lemmaMap = getLemmaSet(searchCfg.getQuery());
+
         for (EntitySite entitySite : entitySites) {
-            List<EntityLemma> foundLemmaList = getLemmaListFromSite(lemmaSet, entitySite);
+            List<EntityLemma> foundLemmaList = getLemmaListFromSite(lemmaMap, entitySite);
             if (foundLemmaList.isEmpty()) {
                 log.debug("Поисковый запрос сайта " + entitySite.getName() + " обработан. Ответ пустой.");
                 continue;
@@ -52,15 +54,19 @@ public class SearchServiceImpl implements SearchService {
         if (entityPageFloatHashMap.isEmpty()) {
             return new ArrayList<>();
         }
+        Set<String>strings = new HashSet<>();
+        for(Map.Entry<String,Set<String>>entry:lemmaMap.entrySet()){
+            strings.addAll(entry.getValue());
+        }
         HashMap<EntityPage, Float> resultMap = getResultMap(entityPageFloatHashMap, searchCfg.getLimit());
-        return getSearchDto(resultMap, lemmaSet);
+        return getSearchDto(resultMap, strings);
     }
 
     @SneakyThrows
     @Override
     public List<SearchDto> siteSearch(SearchCfg searchCfg) {
         EntitySite site = siteRepository.findEntitySiteByUrl(searchCfg.getSite());
-        Set<String> lemmaSet = getLemmaSet(searchCfg.getQuery());
+        Map<String, Set<String>> lemmaSet = getLemmaSet(searchCfg.getQuery());
         List<EntityLemma> foundLemmaList = getLemmaListFromSite(lemmaSet, site);
         if (foundLemmaList.isEmpty()) {
             log.debug("Поисковый запрос обработан. Ответ пустой.");
@@ -72,7 +78,11 @@ public class SearchServiceImpl implements SearchService {
         if (pageFloatHashMap.isEmpty()) {
             return new ArrayList<>();
         }
-        return getSearchDto(resultMap, lemmaSet);
+        Set<String>strings = new HashSet<>();
+        for(Map.Entry<String,Set<String>>entry:lemmaSet.entrySet()){
+            strings.addAll(entry.getValue());
+        }
+        return getSearchDto(resultMap, strings);
     }
 
     private List<SearchDto> getSearchDto(HashMap<EntityPage, Float> entityPageFloatHashMap, Set<String> entityLemmas) throws ExecutionException, InterruptedException {
@@ -157,19 +167,34 @@ public class SearchServiceImpl implements SearchService {
                         (a, b) -> a, LinkedHashMap::new));
     }
 
-    private Set<String> getLemmaSet(String searchText) {
+    private Map<String,Set<String>> getLemmaSet(String searchText) {
         String[] splitText = searchText.split("\\s+");
-        Set<String> result = new HashSet<>();
+        Map<String, Set<String>> result = new HashMap<>();
         for (String word : splitText) {
             List<String> lemma = morphology.getLemma(word);
-            result.addAll(lemma);
+            Set<String> stringHashSet = new HashSet<>();
+            stringHashSet.addAll(lemma);
+            result.put(word, stringHashSet);
         }
+
         return result;
     }
 
-    private List<EntityLemma> getLemmaListFromSite(Set<String> words, EntitySite entitySite) {
-        List<EntityLemma> entityLemmas = lemmaRepository.selectLemmasBySite(words, entitySite);
-        entityLemmas.sort(Comparable::compareTo);
-        return entityLemmas;
+    private List<EntityLemma> getLemmaListFromSite(Map<String,Set<String>> words, EntitySite entitySite) {
+        Integer count = 0;
+        List<EntityLemma>result = new ArrayList<>();
+        for(Map.Entry<String,Set<String>> entry:words.entrySet()){
+            List<EntityLemma> entityLemmas = lemmaRepository.selectLemmasBySite(entry.getValue(), entitySite);
+            if(!entityLemmas.isEmpty()){
+                count++;
+                result.addAll(entityLemmas);
+            }
+        }
+        if(count!=words.size()){
+            return new ArrayList<>();
+        }else {
+            result.sort(Comparable::compareTo);
+            return result;
+        }
     }
 }

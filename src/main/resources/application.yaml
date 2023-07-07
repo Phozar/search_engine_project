@@ -1,35 +1,35 @@
 # example values
 indexing-settings:
   sites:
-    - url: http://www.playback.ru/
+    - url: http://playback.ru/
       name: playback
 
     - url: https://volochek.life/
       name: volochek
 
-    - url: http://radiomv.ru/
-      name: radio
+#    - url: http://radiomv.ru/
+#      name: radio
 
     - url: https://ipfran.ru/
       name: ipfran
 
-    - url: https://dimonvideo.ru/
-      name: dimonvideo
-
-    - url: https://nikoartgallery.com/
-      name: nikoartgallery
-
-    - url: https://et-cetera.ru/mobile/
-      name: etc
-
-    - url: https://www.lutherancathedral.ru/
-      name: lutherancathedral
-
-    - url: https://dombulgakova.ru/
-      name: dombulgakova
-
-    - url: https://www.svetlovka.ru/
-      name: svetlovka
+#    - url: https://dimonvideo.ru/
+#      name: dimonvideo
+#
+#    - url: https://nikoartgallery.com/
+#      name: nikoartgallery
+#
+#    - url: https://et-cetera.ru/mobile/
+#      name: etc
+#
+#    - url: https://lutherancathedral.ru/
+#      name: lutherancathedral
+#
+#    - url: https://dombulgakova.ru/
+#      name: dombulgakova
+#
+#    - url: https://svetlovka.ru/
+#      name: svetlovka
 
   name: SearchBotFix/2.0
   referer: https://google.com
