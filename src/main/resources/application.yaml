@@ -1,4 +1,3 @@
-# example values
 indexing-settings:
   sites:
     - url: http://playback.ru/
@@ -7,29 +6,8 @@ indexing-settings:
     - url: https://volochek.life/
       name: volochek
 
-#    - url: http://radiomv.ru/
-#      name: radio
-
     - url: https://ipfran.ru/
       name: ipfran
-
-#    - url: https://dimonvideo.ru/
-#      name: dimonvideo
-#
-#    - url: https://nikoartgallery.com/
-#      name: nikoartgallery
-#
-#    - url: https://et-cetera.ru/mobile/
-#      name: etc
-#
-#    - url: https://lutherancathedral.ru/
-#      name: lutherancathedral
-#
-#    - url: https://dombulgakova.ru/
-#      name: dombulgakova
-#
-#    - url: https://svetlovka.ru/
-#      name: svetlovka
 
   name: SearchBotFix/2.0
   referer: https://google.com
